@@ -160,13 +160,20 @@ class SubsonicConnection:
 
         if len(result_dict['searchResult3']) > 0:
             # Results found
-            result_count = len(result_dict['searchResult3']['song'])
+            results = result_dict['searchResult3']['song']
+            filteredResults = []
+
+            for song in results:
+                if term.lower() in song['title'].lower():
+                    filteredResults.append(song)
+            
+            result_count = len(filteredResults)
 
             self.logger.debug(f'Searching songs for term: {term}, found {result_count} entries.')
 
             if result_count > 0:
                 # Results were found
-                return result_dict['searchResult3']['song']
+                return filteredResults
 
         # No results were found
         return None

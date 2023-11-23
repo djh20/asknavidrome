@@ -454,6 +454,47 @@ class NaviSonicPlaySongByArtist(AbstractRequestHandler):
             track_details = play_queue.get_next_track()
 
             return controller.start_playback('play', speech, card, track_details, handler_input)
+        
+class NaviSonicPlaySong(AbstractRequestHandler):
+    """Handle the NaviSonicPlaySong intent
+
+    Play the given song.
+    """
+
+    def can_handle(self, handler_input: HandlerInput) -> bool:
+        return is_intent_name('NaviSonicPlaySong')(handler_input)
+
+    def handle(self, handler_input: HandlerInput) -> Response:
+        logger.debug('In NaviSonicPlaySong')
+
+        # Get variables from intent
+        song = get_slot_value_v2(handler_input, 'song')
+
+        logger.debug(f'Searching for the song {song.value}')
+
+        # Search for song
+        song_list = connection.search_song(song.value)
+
+        # Create list of song ids
+        song_dets = [item.get('id') for item in song_list]
+
+        if not song_dets:
+            text = f"I couldn't find any songs called {song.value}"
+            handler_input.response_builder.speak(text).ask(text)
+
+            return handler_input.response_builder.response
+
+        play_queue.clear()
+        controller.enqueue_songs(connection, play_queue, song_dets)
+
+        speech = f'Playing {song.value}'
+        logger.info(speech)
+        card = {'title': 'AskNavidrome',
+                'text': speech
+                }
+        track_details = play_queue.get_next_track()
+
+        return controller.start_playback('play', speech, card, track_details, handler_input)
 
 
 class NaviSonicPlayPlaylist(AbstractRequestHandler):
@@ -954,6 +995,7 @@ sb.add_request_handler(HelpHandler())
 sb.add_request_handler(NaviSonicPlayMusicByArtist())
 sb.add_request_handler(NaviSonicPlayAlbumByArtist())
 sb.add_request_handler(NaviSonicPlaySongByArtist())
+sb.add_request_handler(NaviSonicPlaySong())
 sb.add_request_handler(NaviSonicPlayPlaylist())
 sb.add_request_handler(NaviSonicPlayFavouriteSongs())
 sb.add_request_handler(NaviSonicPlayMusicByGenre())

@@ -165,8 +165,10 @@ class SubsonicConnection:
 
             for song in results:
                 song_title = song['title']
-                if song_title.find(term) > -1:
+                self.logger.debug(f'Filtering song: {song_title}')
+                if term.lower() in song_title.lower():
                     filteredResults.append(song)
+                    self.logger.debug(f'Adding {song_title} to list')
             
             result_count = len(filteredResults)
 

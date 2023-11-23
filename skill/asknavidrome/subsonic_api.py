@@ -156,7 +156,7 @@ class SubsonicConnection:
 
         self.logger.debug('In function search_song()')
 
-        result_dict = self.conn.search3(term)
+        result_dict = self.conn.search3(term, songCount=1000)
 
         if len(result_dict['searchResult3']) > 0:
             # Results found
@@ -165,9 +165,7 @@ class SubsonicConnection:
 
             for song in results:
                 song_title = song['title']
-                print(f'Filtering song: {song_title}')
                 if song_title.find(term) > -1:
-                    print(f'Added {song_title} to list')
                     filteredResults.append(song)
             
             result_count = len(filteredResults)
